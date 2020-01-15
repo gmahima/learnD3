@@ -6,51 +6,97 @@ const height = 450;
 const margin = { top: 20, right: 5, bottom: 20, left: 35 };
 
 class Chart extends Component {
-  state = {
-    bars: [],
-    radial: []
-  };
+//   state = {
+//     bars: [],
+//     radial: []
+//   };
+//  xAxis = d3.axisLeft();
+//  yAxis = d3.axisBottom();
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const { data } = nextProps;
-    if (!data) return {};
-    const perSliceAngle = (2*Math.PI)/data.length;
-  const radiusScale= d3.scaleLinear()
-  .domain([d3.min(data, d=>d.low), d3.max(data, d=>d.high)])
-  .range([0, width/3]);
-  const colorExtent = d3.extent(data, d=>d.avg).reverse();
-  const colorScale = d3.scaleSequential().domain(colorExtent).interpolator(d3.interpolateRdYlBu);
- console.log(colorScale(43));
-  const arcGen = d3.arc(); 
-  const radial =  data.map((d,i) => ({
+//   static getDerivedStateFromProps(nextProps, prevState) {
+//     const { data } = nextProps;
+//     if (!data) return {};
+//     const extent = d3.extent(data, d=> d.date)
+//     const xScale = d3.scaleTime()
+//       .domain(extent)
+//       .range([margin.left, width-margin.right])
+//     // console.log('===', xScale(new Date('12/31/2017')  ))
     
-    path: arcGen({
-    innerRadius: radiusScale(d.low),
-    outerRadius: radiusScale(d.high),
-    startAngle:  i*perSliceAngle,
-    endAngle:     (i+1)*perSliceAngle
-  }),
-    fill: colorScale(d.avg)
-  
-  }));
-    return {radial};
-  }
+//     const [min, max] = d3.extent(data, d=> d.high)
+//     const yScale = d3.scaleLinear()
+//       .domain([Math.min(min, 0), max])
+//       .range([height-margin.bottom, margin.top])
+    
+//     // const highEx = d3.extent(data, d=>d.high)
+//     // const lowEx = d3.extent(data, d=>d.low)
+//     // console.log('high range', highEx, 'low range', lowEx)
+    
+//     const colorExtent = d3.extent(data, d=>d.avg).reverse()
+//     //const colorExtent = d3.extent(data.map(d=>d.avg)).reverse()
+//     const colorScale = d3.scaleSequential()
+//   .domain(colorExtent).interpolator(d3.interpolateRdYlBu)
+//     console.log(d3.extent(data.map(d=>d.avg)).reverse())
+//     console.log(colorExtent)
+    
+//    const bars= data.map(d=> {
+//     return {
+//       x: xScale(d.date),
+//       y: yScale(d.high),
+//       height: yScale(d.low) - yScale(d.high),
+//       fill: colorScale(d.avg),
+//     }
+//    })
+//     return {bars, xScale, yScale};
+//   }
+//   componentDidUpdate(){
+    
+//   }
+//   render() {
 
-  render() {
+//     return (
+//     <svg width={width} height={height} >
 
-    return (
-    <svg width={width} height={height} >
-      <g transform={`translate(${width/2},${height/2})`}>
-        {
-          this.state.radial.map(d=>{
- //           console.log("path: " + d.path + "  fill: " + d.fill);
-            return <path d={d.path} fill={d.fill}  />
-          })
-        }
-      </g>
+//         {
+//           this.state.bars.map(d=>{
+//             return <rect x={d.x} y={d.y} width={2} height={d.height}fill={d.fill}  />
+//           })
+//         }
+//         <g ref={'xAxis'}/>
+//         <g ref={'yAxis'}/>
 
-   </svg>)
-  }
+
+//    </svg>)
+//   }
+myChart = Highcharts.chart('container', {
+  chart: {
+      type: 'bar'
+  },
+  title: {
+      text: 'Fruit Consumption'
+  },
+  xAxis: {
+      categories: ['Apples', 'Bananas', 'Oranges']
+  },
+  yAxis: {
+      title: {
+          text: 'Fruit eaten'
+      }
+  },
+  series: [{
+      name: 'Jane',
+      data: [1, 0, 4]
+  }, {
+      name: 'John',
+      data: [5, 7, 3]
+  }]
+});
+render() {
+
+  return <div>
+    {this.myChart}
+  </div>
 }
+}
+
 
 export default Chart;
