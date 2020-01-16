@@ -8,10 +8,12 @@ const margin = { top: 20, right: 5, bottom: 20, left: 35 };
 class Chart extends Component {
   state = {
     bars: [],
-    radial: []
+    radial: [],
+    xScale: undefined,
+    yScale: undefined
   };
- xAxis = d3.axisLeft();
- yAxis = d3.axisBottom();
+ xAxis = d3.axisBottom();
+ yAxis = d3.axisLeft();
 
   static getDerivedStateFromProps(nextProps, prevState) {
     const { data } = nextProps;
@@ -49,7 +51,11 @@ class Chart extends Component {
     return {bars, xScale, yScale};
   }
   componentDidUpdate(){
-    
+    this.xAxis.scale(this.state.xScale)
+    d3.select(this.refs.xAxis).call(this.xAxis)
+    this.yAxis.scale(this.state.yScale)
+    d3.select(this.refs.yAxis).call(this.yAxis)
+
   }
   render() {
 
@@ -61,8 +67,8 @@ class Chart extends Component {
             return <rect x={d.x} y={d.y} width={2} height={d.height}fill={d.fill}  />
           })
         }
-        <g ref={'xAxis'}/>
-        <g ref={'yAxis'}/>
+        <g ref="xAxis" transform={`translate(0, ${height-margin.bottom})`}/>
+        <g ref="yAxis" transform={`translate(${margin.left}, 0)`}/>
 
 
    </svg>)
