@@ -57,6 +57,17 @@ class Chart extends Component {
     d3.select(this.refs.yAxis).call(this.yAxis)
 
   }
+  componentDidMount() {
+    this.brush = d3.brushX().extent([[margin.left, margin.top], [width-margin.right,height-margin.top]])
+    .on('end', () =>{
+      const [min, max] = d3.event.selection;
+      const range = [this.state.xScale.invert(min), this.state.xScale.invert(max)]
+      console.log(range)
+
+    })
+    d3.select(this.refs.brush)
+    .call(this.brush)
+  }
   render() {
 
     return (
@@ -69,6 +80,7 @@ class Chart extends Component {
         }
         <g ref="xAxis" transform={`translate(0, ${height-margin.bottom})`}/>
         <g ref="yAxis" transform={`translate(${margin.left}, 0)`}/>
+        <g ref="brush" />
 
 
    </svg>)

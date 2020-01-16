@@ -6,7 +6,8 @@ import Chart from "./visualizations/Chart";
 class App extends Component {
   state = {
     temps: {},
-    city: "sf" // city whose temperatures to show
+    city: "sf" ,
+    // city whose temperatures to show
   };
 
   componentDidMount() {
