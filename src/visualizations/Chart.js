@@ -16,7 +16,7 @@ class Chart extends Component {
  yAxis = d3.axisLeft();
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    const { data } = nextProps;
+    const { data, range} = nextProps;
     if (!data) return {};
     const extent = d3.extent(data, d=> d.date)
     const xScale = d3.scaleTime()
@@ -41,13 +41,15 @@ class Chart extends Component {
     console.log(colorExtent)
     
    const bars= data.map(d=> {
+    const isColored = !range.length || range[0]<d.date&& range[1]>d.date;
     return {
       x: xScale(d.date),
       y: yScale(d.high),
       height: yScale(d.low) - yScale(d.high),
-      fill: colorScale(d.avg),
+      fill: isColored?colorScale(d.avg):'grey',
     }
    })
+   
     return {bars, xScale, yScale};
   }
   componentDidUpdate(){
@@ -62,7 +64,7 @@ class Chart extends Component {
     .on('end', () =>{
       const [min, max] = d3.event.selection;
       const range = [this.state.xScale.invert(min), this.state.xScale.invert(max)]
-      console.log(range)
+      this.props.updateRange(range);
 
     })
     d3.select(this.refs.brush)
