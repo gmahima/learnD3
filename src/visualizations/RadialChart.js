@@ -10,72 +10,58 @@ class RadialChart extends Component {
     tempAnnotations: []
   };
 
+  arcGenerator = d3.arc();
+
   static getDerivedStateFromProps(nextProps, prevState) {
-    const { data, range } = nextProps;
-    if (!data) return {};
+    if (!nextProps.data) return null; // data hasn't been loaded yet so do nothing
+    const { data } = nextProps;
+    const radiusScale = d3.scaleLinear().range([0, width / 2]);
+    const colorScale = d3.scaleSequential(d3.interpolateRdYlBu);
 
-    const radiusScale = d3
-      .scaleLinear()
-      .domain([d3.min(data, d => d.low), d3.max(data, d => d.high)])
-      .range([0, width / 2]);
+    // data has changed, so recalculate scale domains
+    const tempMax = d3.max(data, d => d.high);
+    const colorDomain = d3.extent(data, d => d.avg).reverse();
+    radiusScale.domain([0, tempMax]);
+    colorScale.domain(colorDomain);
 
-    const colorScale = d3
-      .scaleSequential()
-      .domain(d3.extent(data, d => d.avg))
-      .interpolator(d3.interpolateRdYlBu);
-
-    // get the angle for each slice
-    // 2PI / 365
+    // one arc per day, innerRadius is low temp, outerRadius is high temp
     const perSliceAngle = (2 * Math.PI) / data.length;
-
-    const arcGenerator = d3.arc();
     const slices = data.map((d, i) => {
-      const path = arcGenerator({
+      const arcData = {
         startAngle: i * perSliceAngle,
         endAngle: (i + 1) * perSliceAngle,
         innerRadius: radiusScale(d.low),
         outerRadius: radiusScale(d.high)
-      });
-      // slice should be colored if there's no time range
-      // or if the slice is within the time range
-      const isColored =
-        !range.length || (range[0] <= d.date && d.date <= range[1]);
-      return {
-        path,
-        fill: isColored ? colorScale(d.avg) : "#ccc"
       };
+
+      return { arcData, fill: colorScale(d.avg) };
     });
 
-    const tempAnnotations = [5, 20, 40, 60, 80].map(temp => {
-      return {
-        r: radiusScale(temp),
-        temp
-      };
-    });
+    return { slices };
+  }
+  componentDidMount(){
+    this.ctx = this.refs.canvas.getContext("2d");
+    this.ctx.translate(width/2, height/2)
+    this.arcGenerator.context(this.ctx);
+    this.drawSlices()
 
-    return { slices, tempAnnotations };
+
+  }
+  componentDidUpdate(){
+    this.drawSlices()
+  }
+  drawSlices() {
+    this.state.slices.forEach(d=>{
+      this.ctx.fillStyle =d.fill,
+      this.ctx.beginPath();
+      this.arcGenerator(d.arcData)
+      this.ctx.fill()
+    })
   }
 
   render() {
-    return (
-      <svg width={width} height={height}>
-        <g transform={`translate(${width / 2}, ${height / 2})`}>
-          {this.state.slices.map((d, i) => (
-            <path key={i} d={d.path} fill={d.fill} />
-          ))}
-
-          {this.state.tempAnnotations.map((d, i) => (
-            <g key={i}>
-              <circle r={d.r} fill="none" stroke="#999" />
-              <text y={-d.r - 2} textAnchor="middle">
-                {d.temp}℉
-              </text>
-            </g>
-          ))}
-        </g>
-      </svg>
-    );
+    return <canvas ref="canvas" width={width} height={height} />;
   }
 }
 
-export default RadialChart;
+export default RadialChart
